@@ -2,73 +2,70 @@ const express = require('express');
 const app = express();
 const PORT = 3000;
 
-// --- 1. GLOBAL MIDDLEWARE (The "Factory Entrance") ---
-// These run on EVERY request before anything else.
-
-// Translator: Allows the server to read JSON data sent by users
+// --- 1. GLOBAL MIDDLEWARE ---
 app.use(express.json());
 
-// Logger: Prints every request to your terminal so you can see what's happening
+// Simple Logger
 app.use((req, res, next) => {
     console.log(`[${new Date().toISOString()}] ${req.method} to ${req.url}`);
-    next(); // "next()" tells Express to move to the next section
+    next();
 });
 
+// --- 2. CUSTOM ERROR CLASS ---
+// This helps us define the message and the status code (like 400 or 500)
+class ApiError extends Error {
+    constructor(message, statusCode) {
+        super(message);
+        this.statusCode = statusCode;
+    }
+}
 
-// --- 2. TEMPORARY DATABASE (The "Warehouse") ---
+// --- 3. DATABASE ---
 let posts = [
-    { id: 1, title: "Hello World", content: "Welcome to my API!", author: "Admin" },
-    { id: 2, title: "Middleware Tips", content: "Order matters in Express!", author: "Dev" }
+    { id: 1, title: "Hello World", content: "Welcome to my API!", author: "Admin" }
 ];
-let nextId = 3;
 
+// --- 4. ROUTES ---
 
-// --- 3. ROUTES (The "Workstations") ---
-
-// Home Page
 app.get('/', (req, res) => {
     res.send('Welcome to CommunityHub API');
 });
 
-// GET all posts
+// Route that intentionally triggers an error for testing
+app.get('/api/error-test', (req, res, next) => {
+    try {
+        // We "throw" an error on purpose
+        throw new ApiError('This is a simulated server error!', 500);
+    } catch (error) {
+        next(error); // This sends the error to the handler at the bottom
+    }
+});
+
 app.get('/api/posts', (req, res) => {
     res.json(posts);
 });
 
-// GET a single post by ID
-app.get('/api/posts/:id', (req, res) => {
-    const id = parseInt(req.params.id);
-    const post = posts.find(p => p.id === id);
-    
-    if (!post) {
-        return res.status(404).json({ error: 'Post not found' });
-    }
-    res.json(post);
-});
-
-// POST a new post (Create)
-app.post('/api/posts', (req, res) => {
-    const { title, content, author } = req.body;
-    
-    if (!title || !content || !author) {
-        return res.status(400).json({ error: 'Missing required fields' });
-    }
-    
-    const newPost = { id: nextId++, title, content, author };
-    posts.push(newPost);
-    res.status(201).json(newPost);
-});
-
-
-// --- 4. 404 HANDLER (The "Security Guard") ---
-// This must be BELOW all your routes. If the request didn't match 
-// any route above, this will catch it.
+// --- 5. 404 HANDLER (NOT FOUND) ---
 app.use((req, res) => {
     res.status(404).json({ error: 'Route not found' });
 });
 
+// --- 6. GLOBAL ERROR HANDLER (MUST BE LAST) ---
+// Note the 4 arguments: (err, req, res, next)
+app.use((err, req, res, next) => {
+    console.error(err.stack); // Still log the error for the developer to see
 
-// --- 5. SERVER START (The "Power Switch") ---
+    const statusCode = err.statusCode || 500;
+    const message = err.message || 'Internal Server Error';
+
+    res.status(statusCode).json({
+        error: {
+            message: message,
+            status: statusCode
+        }
+    });
+});
+
 app.listen(PORT, () => {
     console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
