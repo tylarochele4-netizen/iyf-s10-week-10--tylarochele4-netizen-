@@ -1,0 +1,26 @@
+{
+  "name": "iyf-s10-week-10--tylarochele4-netizen-",
+  "version": "1.0.0",
+  "description": "",
+  "main": "hello.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tylarochele4-netizen/iyf-s10-week-10--tylarochele4-netizen-.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/tylarochele4-netizen/iyf-s10-week-10--tylarochele4-netizen-/issues"
+  },
+  "homepage": "https://github.com/tylarochele4-netizen/iyf-s10-week-10--tylarochele4-netizen-#readme",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1"
+  }
+}

@@ -7,6 +7,11 @@ const postsRoutes = require('./routes/posts');
 app.use(express.json());
 
 // 2. Routes
+app.get('/', (req, res) => {
+    res.send('Welcome to CommunityHub API - The Server is ALIVE!');
+});
+
+// Your existing posts route
 app.use('/api/posts', postsRoutes);
 
 // 3. 404 Handler (If no routes match)
